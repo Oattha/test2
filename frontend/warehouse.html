@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Management</title>
+    <link rel="stylesheet" type="text/css" href="edit_d.css">
+</head>
+<body>
+    <header>
+        <h1>Warehouse Management</h1>
+    </header>
+    <button class="btn-back" onclick="window.location.href='indexwarehouse.html'">กลับสู่ข้อมูลพื้นที่เก็บสินค้า</button>
+    <div id="warehouse"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+
+        window.onload = async () => {
+            await loadData();
+        };
+
+        const loadData = async () => {
+            console.log('loaded');
+            try {
+                const response = await axios.get(`${BASE_URL}/warehouses`);
+                console.log(response.data);
+
+                const warehouseDOM = document.getElementById('warehouse');
+                let htmlData = '';
+
+                for (let i = 0; i < response.data.length; i++) {
+                    let warehouse = response.data[i];
+                    htmlData += `<div class="warehouse-item">
+                        <div>ID: ${warehouse.id}</div>
+                        <div>Area: ${warehouse.warehouse_area}</div>
+                        <div>Storage: ${warehouse.product_storage}</div>
+                        <div>Arrangement: ${warehouse.area_arrangement}</div>
+                        <a href='indexwarehouse.html?id=${warehouse.id}'><button class='edit'>Edit</button></a>
+                        <button class='delete' data-id='${warehouse.id}'>Delete</button>
+                    </div>`;
+                }
+
+                warehouseDOM.innerHTML = htmlData;
+
+                const editButtons = document.querySelectorAll('.edit');
+                editButtons.forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        // Your edit functionality here
+                        console.log('Edit button clicked');
+                        // Add your edit functionality here
+                    });
+                });
+
+                const deleteButtons = document.querySelectorAll('.delete');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const id = event.target.dataset.id;
+                        const confirmDelete = confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
+                        if (confirmDelete) {
+                            try {
+                                await axios.delete(`${BASE_URL}/warehouses/${id}`);
+                                loadData();
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        };
+    </script>
+</body>
+</html>

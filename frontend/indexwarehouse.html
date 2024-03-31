@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ส่วนที่ไม่แสดงออกไปในหน้าจอของ Browser -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.5">
+  <title>Document 2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ส่วนที่แสดงออกไปในหน้าจอของ Browser -->
+
+  <div class="container">
+    <!-- 3. form -->
+    <div class="header form-input">
+    ข้อมูลพื้นที่เก็บสินค้า
+    </div>
+    <div class="flex form-input">
+      <div class="header-form">พื้นที่ในคลัง</div>
+      <input class="form" name="warehouse_area" type="text">
+    </div>
+    <div class="form-input product_storage form-input">
+      <div class="flex">การจัดเก็บสินค้า</div>
+      <div class="flex">
+        <div>
+          <input name="product_storage" type="radio" value="ระบบชั้นวาง"> ระบบชั้นวาง
+        </div>
+        <div>
+          <input name="product_storage" type="radio" value="พาเลท"> พาเลท
+        </div>
+        <div>
+          <input name="product_storage" type="radio" value="RFID"> RFID
+        </div>
+      </div>
+    </div>
+
+    <div class="form-input">
+        <div class="header-form">การจัดเรียงพื้นที่</div>
+        <div class="form-input">
+          <div>
+            <input name="area_arrangement" type="radio" value="อาหาร"> อาหาร
+          </div>
+          <div>
+            <input name="area_arrangement" type="radio" value="ของใช้สำนักงาน"> ของใช้สำนักงาน
+          </div>
+          <div>
+            <input name="area_arrangement" type="radio" value="ของใช้ครัวเรือน"> ของใช้ครัวเรือน
+          </div>
+          <div>
+            <input name="area_arrangement" type="radio" value="เฟอร์นิเจอร์"> เฟอร์นิเจอร์
+          </div>
+          <div>
+            <input name="area_arrangement" type="radio" value="อุปกรณ์อิเล็กทรอนิกส์"> อุปกรณ์อิเล็กทรอนิกส์
+          </div>
+        </div>
+      </div>
+
+    <div class="form-input">
+    <div id="message" class="message"></div> 
+    <div class="center">
+      <button onclick="submitData()" class="button">ส่งข้อมูล</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+<script src="indexwarehouse.js"></script>
+</body>
+</html>
+
+<button class="btn-back" onclick="window.location.href='index.html'">กลับสู่ระบบบันทึกข้อมูลการจัดการการขนส่ง</button>
+    <button class="btn2-back" onclick="window.location.href='warehouse.html'">ไปที่การจัดการคลังสินค้า</button>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipments Management</title>
+    <link rel="stylesheet" href="edit_d2.css">
+</head>
+<body>
+    <header>
+        <h1>Shipments Management</h1>
+    </header>
+    <button class="btn-back" onclick="window.location.href='indexshipment.html'">กลับสู่ข้อมูลสินค้าและการจัดส่ง</button>
+    <div class="container" id="shipment"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+
+        window.onload = async () => {
+            await loadData();
+        };
+
+        const loadData = async () => {
+            console.log('loaded');
+            try {
+                const response = await axios.get(`${BASE_URL}/shipments`);
+                console.log(response.data);
+
+                const shipmentDOM = document.getElementById('shipment');
+                let htmlData = '';
+
+                for (let i = 0; i < response.data.length; i++) {
+                    let shipment = response.data[i];
+                    htmlData += `<div class="shipment-item">
+                        <div>ID: ${shipment.id}</div>
+                        <div>Product Code: ${shipment.product_code}</div>
+                        <div>Source/Destination: ${shipment.source_destination}</div>
+                        <div>Delivery Status: ${shipment.delivery_status}</div>
+                        <a href='indexshipment.html?id=${shipment.id}'><button class='edit'>Edit</button></a>
+                        <button class='delete' data-id='${shipment.id}'>Delete</button>
+                    </div>`;
+                }
+
+                shipmentDOM.innerHTML = htmlData;
+
+                const deleteButtons = document.querySelectorAll('.delete');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const id = event.target.dataset.id;
+                        const confirmDelete = confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
+                        if (confirmDelete) {
+                            try {
+                                await axios.delete(`${BASE_URL}/shipments/${id}`);
+                                loadData();
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        };
+    </script>
+</body>
+</html>

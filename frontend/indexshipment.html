@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ส่วนที่ไม่แสดงออกไปในหน้าจอของ Browser -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document 2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ส่วนที่แสดงออกไปในหน้าจอของ Browser -->
+
+  <div class="container">
+    <!-- 3. form -->
+    <div class="header form-input">
+      ข้อมูลสินค้าและการจัดส่ง
+    </div>
+    <div class="flex form-input">
+      <div class="header-form">รหัสสินค้า</div>
+      <input class="form" name="product_code" type="text">
+    </div>
+    <div class="flex form-input">
+      <div class="header-form">สถานที่ต้นทาง-ปลายทาง </div>
+      <input class="form" name="source_destination" type="text">
+    </div>
+    <div class="form-input delivery_status form-input">
+      <div class="flex">สถานะการจัดส่ง</div>
+      <div class="flex">
+        <div>
+          <input name="delivery_status" type="radio" value="รอการจัดส่ง"> รอการจัดส่ง
+        </div>
+        <div>
+          <input name="delivery_status" type="radio" value="กำลังจัดส่ง"> กำลังจัดส่ง
+        </div>
+        <div>
+          <input name="delivery_status" type="radio" value="จัดส่งแล้ว"> จัดส่งแล้ว
+        </div>
+      </div>
+    </div>
+
+    <div class="form-input">
+    <div id="message" class="message"></div> 
+    <div class="center">
+      <button onclick="submitData()" class="button">ส่งข้อมูล</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+<script src="indexshipment.js"></script>
+</body>
+</html>
+
+<button class="btn-back" onclick="window.location.href='index.html'">กลับสู่ระบบบันทึกข้อมูลการจัดการการขนส่ง</button>
+<button class="btn2-back" onclick="window.location.href='shipment.html'">ไปที่การจัดการการขนส่ง</button>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operation Reports Management</title>
+    <link rel="stylesheet" href="edit_d3.css">
+</head>
+<body>
+    <header>
+        <h1>Operation Reports Management</h1>
+    </header>
+    <button class="btn-back" onclick="window.location.href='indexoperation_report.html'">กลับสู่รายงานการดำเนินงาน</button>
+    <div class="container" id="operation_reports"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+
+        window.onload = async () => {
+            await loadData();
+        };
+
+        const loadData = async () => {
+            console.log('loaded');
+            try {
+                const response = await axios.get(`${BASE_URL}/operation_reports`);
+                console.log(response.data);
+
+                const operationReportsDOM = document.getElementById('operation_reports');
+                let htmlData = '';
+
+                for (let i = 0; i < response.data.length; i++) {
+                    let operationReport = response.data[i];
+                    htmlData += `<div class="operation-report-item">
+                        <div>ID: ${operationReport.id}</div>
+                        <div>Product Code: ${operationReport.product_code}</div>
+                        <div>Delivery Time: ${operationReport.delivery_time}</div>
+                        <div>Delivery Issue: ${operationReport.delivery_issue}</div>
+                        <div>Delivery Efficiency: ${operationReport.delivery_efficiency}</div>
+                        <a href='indexoperation_report.html?id=${operationReport.id}'><button class='edit'>Edit</button></a>
+                        <button class='delete' data-id='${operationReport.id}'>Delete</button>
+                    </div>`;
+                }
+
+                operationReportsDOM.innerHTML = htmlData;
+
+                const deleteButtons = document.querySelectorAll('.delete');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const id = event.target.dataset.id;
+                        const confirmDelete = confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
+                        if (confirmDelete) {
+                            try {
+                                await axios.delete(`${BASE_URL}/operation_reports/${id}`);
+                                loadData();
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipment Management</title>
+    <style>
+@font-face {
+  font-family: "kanit";
+  src: url("./Kanit/Kanit-Regular.ttf");
+}
+
+body {
+  font-family: "kanit";
+            margin: 0;
+            padding: 0;
+            background-color: #f0f6fc; /* สีฟ้าอ่อน */
+        }
+        header {
+            background-color: #2980b9; /* สีฟ้าเข้ม */
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        .btn-back {
+            padding: 5px 10px;
+            border: 2px solid #2c3e50; /* เส้นขอบสีเข้ม */
+            border-radius: 5px;
+            background-color: transparent;
+            color: #2c3e50; /* สีเข้ม */
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            font-family: "kanit";
+        }
+        .btn-back:hover {
+            background-color: #2c3e50; /* เปลี่ยนสีพื้นหลัง */
+            color: #fff; /* เปลี่ยนสีตัวอักษร */
+        }
+        #shipment {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .shipment-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shipment-item button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db; /* สีฟ้าอ่อน */
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .shipment-item button:hover {
+            background-color: #2980b9; /* เมื่อเม้าส์ชี้ที่ปุ่ม สีพื้นหลังจะเปลี่ยน */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Shipment Management</h1>
+    </header>
+    <button class="btn-back" onclick="window.location.href='indexshipment.html'">กลับสู่ข้อมูลสินค้าและการจัดส่ง</button>
+    <div id="shipment"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script src="shipment.js"></script>
+</body>
+</html>
+
+

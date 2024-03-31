@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ส่วนที่ไม่แสดงออกไปในหน้าจอของ Browser -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document 2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ส่วนที่แสดงออกไปในหน้าจอของ Browser -->
+
+  <div class="container">
+    <!-- 3. form -->
+    <div class="header form-input">
+    รายงานการดำเนินงาน
+    </div>
+    <div class="flex form-input">
+      <div class="header-form">รหัสสินค้า</div>
+      <input class="form" name="product_code" type="text">
+    </div>
+    <div class="flex form-input">
+      <div class="header-form">การส่งถึงเวลา</div>  
+      <input class="form" name="delivery_time" type="datetime-local">
+    </div>
+    <div class="flex form-input">
+      <div class="flex">ปัญหาในการขนส่ง </div>
+      <input class="form-input form" name="delivery_issue" type="text">
+    </div>
+    <div class="form-input delivery_efficiency form-input">
+      <div class="flex">ประสิทธิภาพของการจัดส่ง</div>
+      <div class="flex">
+        <div>
+            <input name="delivery_efficiency" type="radio" value="ดีมาก"> ดีมาก
+          </div>
+          <div>
+            <input name="delivery_efficiency" type="radio" value="ดี"> ดี
+          </div>
+          <div>
+            <input name="delivery_efficiency" type="radio" value="พอใช้"> พอใช้
+          </div>
+          <div>
+              <input name="delivery_efficiency" type="radio" value="แย่"> แย่
+            </div>
+          <div>
+            <input name="delivery_efficiency" type="radio" value="แย่มาก"> แย่มาก
+          </div>
+      </div>
+    </div>
+
+    <div class="form-input">
+    <div id="message" class="message"></div> 
+    <div class="center">
+      <button onclick="submitData()" class="button">ส่งข้อมูล</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+  <script src="indexoperation_report.js"></script>
+</body>
+</html>
+
+<button class="btn-back" onclick="window.location.href='index.html'">กลับสู่ระบบบันทึกข้อมูลการจัดการการขนส่ง</button>
+<button class="btn2-back" onclick="window.location.href='operation_report.html'">ไปที่การจัดการรายงานการดำเนินงาน</button>

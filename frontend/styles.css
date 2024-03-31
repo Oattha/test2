@@ -1,0 +1,426 @@
+/* สิ่งที่อยู่ตรงนี้ จะมีไว้แค่ให้ dev อ่าน */
+/* 1. แต่งใคร ? (id, class, DOM) 2. แต่งอะไร ? */
+@font-face {
+  font-family: "kanit";
+  src: url("./Kanit/Kanit-Regular.ttf");
+}
+
+body {
+  font-family: "kanit";
+}
+
+.container {
+  width: 100%;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: azure;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.header {
+  font-size: 30px;
+  text-align: center;
+}
+
+.header-form1 {
+  width: 140px;
+}
+
+.flex {
+  display: flex;
+}
+
+.form-input1 {
+  margin-bottom: 10px;
+}
+
+.center {
+  text-align: center;
+}
+
+input.form,
+textarea {
+  border: 1px gainsboro solid;
+  width: 100%;
+}
+
+.button {
+  border: 0;
+  width: 50%;
+  height: 40px;
+  background-color: #2962ff;
+  color: white;
+}
+
+.message {
+  background-color: rgb(211, 211, 211);
+  padding: 10px;
+  margin-bottom: 10px;
+  display: none;
+}
+
+.message.success {
+  background-color: lightgreen;
+  display: block;
+}
+
+.message.danger {
+  background-color: lightcoral;
+  display: block;
+}
+
+.product_storage,
+.area_arrangement {
+  flex-direction: row;
+  align-items: center;
+}
+
+.product_storage input[type="radio"],
+.area_arrangement input[type="radio"] {
+  margin-right: 10px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .flex {
+    flex-direction: column;
+  }
+  .header{
+    font-size: 24px;
+  }
+  .button {
+    width: 100%;
+  }
+}
+
+
+
+/* styles.css */
+
+body {
+  font-family: "kanit";
+  margin: 0;
+  padding: 0;
+  background-color: #f0f6fc;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2980b9;
+}
+
+.form-input {
+  margin-bottom: 20px;
+}
+
+.header-form {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.delivery_efficiency {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.delivery_efficiency div {
+  margin-right: 20px;
+}
+
+.message {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #2980b9;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #2471a3;
+}
+
+.btn-back {
+  margin-top: 20px;
+  padding: 5px 10px;
+  background-color: #2c3e50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+  background-color: #1f2b38;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "kanit";
+  background-color: #f0f6fc;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #2980b9;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.button-links {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.button-links button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  font-family: "kanit";
+}
+
+.button-links button:hover {
+  background-color: #2980b9;
+}
+
+
+
+
+/* styles.css */
+
+/* Reset CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "kanit";
+  background-color: #f0f6fc;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: #3498db;
+}
+
+a:hover {
+  color: #2980b9;
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.header {
+  background-color: #2980b9;
+  color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header-form {
+  width: 150px;
+}
+
+.form-input {
+  margin-bottom: 10px;
+}
+
+.message {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.message.success {
+  background-color: #27ae60;
+  color: #fff;
+}
+
+.message.danger {
+  background-color: #c0392b;
+  color: #fff;
+}
+
+.center {
+  text-align: center;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  font-family: "kanit";
+}
+
+.button:hover {
+  border: 2px solid #2c3e50;
+  background-color: #ffffff; /* เปลี่ยนสีพื้นหลัง */
+  color: #2c3e50;
+}
+
+.btn-back {
+  padding: 5px 10px;
+  border: 6px;
+  background-color: #2c3e50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  font-family: "kanit";
+}
+
+.btn-back:hover {
+  background-color: #3498db;
+}
+
+
+/* styles.css */
+h1 {
+  margin: 0;
+}
+.btn2-back {
+  padding: 5px 10px;
+  border: 2px solid #2c3e50; /* เส้นขอบสีเข้ม */
+  border-radius: 5px;
+  background-color: transparent;
+  font-size: 14px;
+  color: #2c3e50; /* สีเข้ม */
+  cursor: pointer;
+  font-family: "kanit";
+  
+  transition: background-color 0.3s, color 0.3s;
+}
+.btn2-back:hover {
+  background-color: #2c3e50; /* เปลี่ยนสีพื้นหลัง */
+  color: #fff; /* เปลี่ยนสีตัวอักษร */
+}
+#operation_report {
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.operation_report-item {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.operation_report-item button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #3498db; /* สีฟ้าอ่อน */
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.operation_report-item button:hover {
+  background-color: #2980b9; /* เมื่อเม้าส์ชี้ที่ปุ่ม สีพื้นหลังจะเปลี่ยน */
+}
+
+
+
+
+/*เลเยอร์*/
+
+body {
+  animation: changeBackgroundColor 10s infinite;
+  margin: 0;
+  padding: 0;
+  font-family: "kanit";
+}
+
+@keyframes changeBackgroundColor {
+  0% {
+      background-color: #1757b8; /* สีฟ้าเข้ม */
+  }
+  25% {
+      background-color: #5b80de; /* สีฟ้าเขม */
+  }
+  50% {
+      background-color: #87ceeb; /* สีฟ้า */
+  }
+  75% {
+      background-color: #5b80de; /* สีฟ้าเขม */
+  }
+  100% {
+      background-color: #1757b8; /* สีฟ้าเข้ม */
+  }
+}
+
+
+
