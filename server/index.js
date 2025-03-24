@@ -2,359 +2,196 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = 8000;
+
+// Secret key สำหรับ JWT
+const JWT_SECRET_KEY = 'ZlR9xFCNRB5l8F5lzI6lREzcL5FSPj3ZVgFkQXyLgQZSOXf8Od9m5wn8H3fA0XqA';
 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
-let conn = null;
+// ตรวจสอบ JWT Token
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(403).json({ message: 'ไม่มีสิทธิ์เข้าถึงข้อมูลนี้' });
 
-// Initialize MySQL connection
+  jwt.verify(token, JWT_SECRET_KEY, (err, decoded) => {
+    if (err) return res.status(401).json({ message: 'Token หมดอายุหรือไม่ถูกต้อง' });
+    req.user = decoded;
+    next();
+  });
+};
+
+let conn;
+
+// เชื่อมต่อ MySQL
 const initMySQL = async () => {
   conn = await mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'root',
     database: 'webdb',
-    port: 7777
+    port: 7777,
   });
 };
 
-// Validate user data
-const validateData1 = (shipmentData) => {
-  let errors = [];
-  if (!shipmentData.product_code) {
-    errors.push('กรุณากรอกรหัสสินค้า');
-  }
-  if (!shipmentData.source_destination) {
-    errors.push('กรุณากรอกต้นทาง-ปลายทาง')
-  }
-  if (!shipmentData.delivery_status) {
-    errors.push('กรุณาเลือกสถานะการจัดส่ง')
-  }
-  return errors;
+// ฟังก์ชันตรวจสอบข้อมูล
+const validateData = (data, requiredFields) => {
+  return requiredFields
+    .filter((field) => !data[field])
+    .map((field) => `กรุณากรอก ${field}`);
 };
 
-const validateData2 = (userData) => {
-  let errors = [];
-  if (!userData.warehouse_area) {
-    errors.push('กรุณากรอกพื้นที่ในคลัง');
+app.post('/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: 'กรุณากรอกชื่อ อีเมล และรหัสผ่าน'
+      });
+    }
+
+    // ตรวจสอบว่า Email นี้มีในระบบหรือไม่
+    const [existingUser] = await conn.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (existingUser.length > 0) {
+      return res.status(400).json({
+        message: 'อีเมลนี้ถูกใช้ไปแล้ว'
+      });
+    }
+
+    // Hash รหัสผ่านก่อนบันทึก
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // บันทึกข้อมูลผู้ใช้ลง MySQL
+    const [result] = await conn.query(
+      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)', 
+      [name, email, hashedPassword]
+    );
+
+    // สร้าง JWT Token
+    const token = jwt.sign(
+      { userId: result.insertId, email: email },
+      JWT_SECRET_KEY,
+      { expiresIn: '1h' }
+    );
+
+    res.status(201).json({
+      message: 'สมัครสมาชิกสำเร็จ',
+      token: token
+    });
+
+  } catch (error) {
+    console.error('error message', error.message);
+    res.status(500).json({
+      message: 'เกิดข้อผิดพลาดในการสมัครสมาชิก'
+    });
   }
-  if (!userData.product_storage) {
-    errors.push('กรุณาเลือกการจัดเก็บสินค้า')
+});
+
+
+
+// Login API
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const [rows] = await conn.query('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (rows.length === 0) return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+
+    const user = rows[0];
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) return res.status(401).json({ message: 'รหัสผ่านไม่ถูกต้อง' });
+
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET_KEY, { expiresIn: '1h' });
+
+    res.json({ message: 'ล็อกอินสำเร็จ', token });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการล็อกอิน' });
   }
-  if (!userData.area_arrangement) {
-    errors.push('กรุณาเลือกการจัดเรียงพื้นที่')
-  }
-  return errors;
+});
+
+// ฟังก์ชัน CRUD ทั่วไป
+const createCRUDRoutes = (tableName, validateFields) => {
+  app.get(`/${tableName}`, async (req, res) => {
+    try {
+      const results = await conn.query(`SELECT * FROM ${tableName}`);
+      res.json(results[0]);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `เกิดข้อผิดพลาดในการดึงข้อมูล ${tableName}` });
+    }
+  });
+
+  app.post(`/${tableName}`, async (req, res) => {
+    try {
+      let data = req.body;
+      const errors = validateData(data, validateFields);
+
+      if (errors.length > 0) return res.status(400).json({ message: 'กรอกข้อมูลไม่ครบ', errors });
+
+      const results = await conn.query(`INSERT INTO ${tableName} SET ?`, data);
+      res.json({ message: 'insert ok', data: results[0] });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `เกิดข้อผิดพลาดในการเพิ่มข้อมูล ${tableName}` });
+    }
+  });
+
+  app.get(`/${tableName}/:id`, async (req, res) => {
+    try {
+      let id = req.params.id;
+      const results = await conn.query(`SELECT * FROM ${tableName} WHERE id = ?`, [id]);
+
+      if (results[0].length === 0) return res.status(404).json({ message: 'หาไม่เจอ' });
+
+      res.json(results[0][0]);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `เกิดข้อผิดพลาดในการดึงข้อมูล ${tableName}` });
+    }
+  });
+
+  app.put(`/${tableName}/:id`, async (req, res) => {
+    try {
+      let id = req.params.id;
+      let updateData = req.body;
+      const results = await conn.query(`UPDATE ${tableName} SET ? WHERE id = ?`, [updateData, id]);
+
+      res.json({ message: `อัปเดตข้อมูล ${tableName} สำเร็จ`, data: results[0] });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `เกิดข้อผิดพลาดในการอัปเดตข้อมูล ${tableName}` });
+    }
+  });
+
+  app.delete(`/${tableName}/:id`, async (req, res) => {
+    try {
+      let id = req.params.id;
+      const results = await conn.query(`DELETE FROM ${tableName} WHERE id = ?`, [parseInt(id)]);
+
+      res.json({ message: `ลบข้อมูล ${tableName} สำเร็จ`, data: results[0] });
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `เกิดข้อผิดพลาดในการลบข้อมูล ${tableName}` });
+    }
+  });
 };
 
-const validateData3 = (operationData) => {
-  let errors = [];
-  if (!operationData.product_code) {
-    errors.push('กรุณากรอกการรหัสสินค้า');
-  }
-  if (!operationData.delivery_time) {
-    errors.push('กรุณากรอกการส่งถึงเวลา');
-  }
-  if (!operationData.delivery_issue) {
-    errors.push('กรุณากรอกปัญหาในการขนส่ง')
-  }
-  if (!operationData.delivery_efficiency) {
-    errors.push('กรุณาเลือกประสิทธิภาพของการจัดส่ง')
-  }
-  return errors;
-};
+// สร้าง CRUD API สำหรับ shipments, warehouses, operation_reports
+createCRUDRoutes('shipments', ['product_code', 'source_destination', 'delivery_status']);
+createCRUDRoutes('warehouses', ['warehouse_area', 'product_storage', 'area_arrangement']);
+createCRUDRoutes('operation_reports', ['product_code', 'delivery_time', 'delivery_issue', 'delivery_efficiency']);
 
-// GET all shipments
-app.get('/shipments', async (req, res) => {
-  try {
-    const results = await conn.query('SELECT * FROM shipments');
-    res.json(results[0]);
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลการจัดส่งทั้งหมด'
-    });
-  }
-});
-
-app.get('/warehouses', async (req, res) => {
-  try {
-    const results = await conn.query('SELECT * FROM warehouses');
-    res.json(results[0]);
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลรายงานการดำเนินงานทั้งหมด'
-    });
-  }
-});
-
-app.get('/operation_reports', async (req, res) => {
-  try {
-    const results = await conn.query('SELECT * FROM operation_reports');
-    res.json(results[0]);
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลการจัดส่งทั้งหมด'
-    });
-  }
-});
-// path = POST /users สำหรับการสร้าง users ใหม่บันทึกเข้าไป
-app.post('/shipments', async (req, res) => {
-  try {
-      let shipments = req.body
-
-      const errors = validateData1(shipments)
-      if (errors.length > 0) {
-        throw { 
-          message: 'กรอกข้อมูลไม่ครบ',
-          errors: errors }
-      }
-      const results = await conn.query('INSERT INTO shipments SET ?', shipments)
-      res.json({
-        message: 'insert ok',
-        data: results[0]
-      })
-  } catch (error) {
-      const errorMessage = error.message || 'something wrong'
-      const errors = error.errors || []
-      console.error('error message', error.message)
-      res.status(500).json({
-        message: errorMessage,
-        errors: errors
-      })
-  }
-})
-
-app.post('/warehouses', async (req, res) => {
-  try {
-      let warehouses = req.body
-
-      const errors = validateData2(warehouses)
-      if (errors.length > 0) {
-        throw { 
-          message: 'กรอกข้อมูลไม่ครบ',
-          errors: errors }
-      }
-      const results = await conn.query('INSERT INTO warehouses SET ?', warehouses)
-      res.json({
-        message: 'insert ok',
-        data: results[0]
-      })
-  } catch (error) {
-      const errorMessage = error.message || 'something wrong'
-      const errors = error.errors || []
-      console.error('error message', error.message)
-      res.status(500).json({
-        message: errorMessage,
-        errors: errors
-      })
-  }
-})
-
-app.post('/operation_reports', async (req, res) => {
-  try {
-      let operation_reports = req.body
-
-      const errors = validateData3(operation_reports)
-      if (errors.length > 0) {
-        throw { 
-          message: 'กรอกข้อมูลไม่ครบ',
-          errors: errors }
-      }
-      const results = await conn.query('INSERT INTO operation_reports SET ?', operation_reports)
-      res.json({
-        message: 'insert ok',
-        data: results[0]
-      })
-  } catch (error) {
-      const errorMessage = error.message || 'something wrong'
-      const errors = error.errors || []
-      console.error('error message', error.message)
-      res.status(500).json({
-        message: errorMessage,
-        errors: errors
-      })
-  }
-})
-// GET /users/:id สำหรับการดึง users รายคนออกมา
-app.get('/shipments/:id', async (req, res) => {
-  try {
-    let id = req.params.id
-    const results = await conn.query('SELECT * FROM shipments WHERE id = ?', id)
-
-    if (results[0].length == 0) {
-      throw { statusCode: 404, message: 'หาไม่เจอ' }
-    }
-
-    res.json(results[0][0])
-  } catch (error) {
-    console.error('error message', error.message)
-    let statusCode = error.statusCode || 500
-    res.status(statusCode).json({
-      message: 'something wrong',
-      errorMessage: error.message
-    })
-  }
-})
-
-app.get('/warehouses/:id', async (req, res) => {
-  try {
-    let id = req.params.id
-    const results = await conn.query('SELECT * FROM warehouses WHERE id = ?', id)
-
-    if (results[0].length == 0) {
-      throw { statusCode: 404, message: 'หาไม่เจอ' }
-    }
-
-    res.json(results[0][0])
-  } catch (error) {
-    console.error('error message', error.message)
-    let statusCode = error.statusCode || 500
-    res.status(statusCode).json({
-      message: 'something wrong',
-      errorMessage: error.message
-    })
-  }
-})
-
-app.get('/operation_reports/:id', async (req, res) => {
-  try {
-    let id = req.params.id
-    const results = await conn.query('SELECT * FROM operation_reports WHERE id = ?', id)
-
-    if (results[0].length == 0) {
-      throw { statusCode: 404, message: 'หาไม่เจอ' }
-    }
-
-    res.json(results[0][0])
-  } catch (error) {
-    console.error('error message', error.message)
-    let statusCode = error.statusCode || 500
-    res.status(statusCode).json({
-      message: 'something wrong',
-      errorMessage: error.message
-    })
-  }
-})
-
-// PUT to update shipment status
-app.put('/shipments/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    let updateShipment = req.body;
-    const results = await conn.query(
-      'UPDATE shipments SET ? WHERE id = ?',
-      [updateShipment, id]
-    );
-    res.json({
-      message: 'การอัปเดตสถานะการจัดส่งเสร็จสมบูรณ์',
-      data: results[0]
-    });
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการอัปเดตสถานะการจัดส่ง'
-    });
-  }
-});
-
-app.put('/warehouses/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    let updatewarehouses = req.body;
-    const results = await conn.query(
-      'UPDATE warehouses SET ? WHERE id = ?',
-      [updatewarehouses, id]
-    );
-    res.json({
-      message: 'การอัปเดตข้อมูลพื้นที่เก็บสินค้าเสร็จสมบูรณ์', 
-      data: results[0]
-    });
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูลพื้นที่เก็บสินค้า'
-    });
-  }
-});
-
-app.put('/operation_reports/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    let updateoperation_reports = req.body;
-    const results = await conn.query(
-      'UPDATE operation_reports SET ? WHERE id = ?',
-      [updateoperation_reports, id]
-    );
-    res.json({
-      message: 'การอัปเดตรายงานการดำเนินงานเสร็จสมบูรณ์',
-      data: results[0]
-    });
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการอัปเดตรายงานการดำเนินงาน'
-    });
-  }
-});
-
-// DELETE a shipment
-app.delete('/shipments/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    const results = await conn.query('DELETE from shipments WHERE id = ?', parseInt(id));
-    res.json({
-      message: 'การลบการจัดส่งเสร็จสมบูรณ์',
-      data: results[0]
-    });
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการลบการจัดส่ง'
-    });
-  }
-});
-
-app.delete('/warehouses/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    const results = await conn.query('DELETE from warehouses WHERE id = ?', parseInt(id));
-    res.json({
-      message: 'การลบข้อมูลพื้นที่เก็บสินค้าเสร็จสมบูรณ์',
-      data: results[0]
-    });
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการลบข้อมูลพื้นที่เก็บสินค้า'
-    });
-  }
-});
-
-app.delete('/operation_reports/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    const results = await conn.query('DELETE from operation_reports WHERE id = ?', parseInt(id));
-    res.json({
-      message: 'การลบรายงานการดำเนินงานเสร็จสมบูรณ์',
-      data: results[0]
-    });
-  } catch (error) {
-    console.error('error message', error.message);
-    res.status(500).json({
-      message: 'เกิดข้อผิดพลาดในการลบรายงานการดำเนินงาน'
-    });
-  }
-});
-// Start the server
-app.listen(port, async () => {
-  await initMySQL();
-  console.log('เซิร์ฟเวอร์ HTTP ทำงานที่พอร์ต: ' + port);
+// เริ่มเซิร์ฟเวอร์
+initMySQL().then(() => {
+  app.listen(port, () => console.log(`Server running on port ${port}`));
 });

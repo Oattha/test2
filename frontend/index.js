@@ -143,3 +143,16 @@ window.onload = async () => {
       messageDOM.className = 'message danger'
     }
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "login.html"; // ถ้ายังไม่ได้ล็อกอินให้พาไป login.html
+    }
+});
+
+const logout = () => {
+  localStorage.removeItem("token"); // ลบ token ออกจาก localStorage
+  window.location.href = "login.html"; // พาไปที่หน้า login
+};

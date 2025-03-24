@@ -1,26 +1,31 @@
-document.getElementById('loginForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
+const BASE_URL = "http://localhost:8000";
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+document.addEventListener("DOMContentLoaded", () => {
+    const loginForm = document.getElementById("loginForm");
 
-    try {
-        const response = await fetch('http://your-backend-url/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        });
+    loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-        if (response.ok) {
-            window.location.href = 'index.html'; // เปลี่ยนเส้นทางไปยังหน้าเว็บหลังเข้าสู่ระบบสำเร็จ
-        } else {
-            throw new Error('Login failed');
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch(`${BASE_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("token", data.token); // บันทึก token
+                window.location.href = "index.html"; // พาไปที่หน้า index
+            } else {
+                document.getElementById("message").textContent = data.message;
+            }
+        } catch (error) {
+            document.getElementById("message").textContent = "เกิดข้อผิดพลาด";
         }
-    } catch (error) {
-        console.error(error);
-        alert('Login failed. Please try again.');
-    }
+    });
 });
-
